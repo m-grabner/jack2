@@ -181,6 +181,10 @@ def cleanup(bld):
 			CMake(bld, loc).cleanup()
 
 
+def getattrlist(obj, name):
+	l = getattr(obj, name, [])
+	return l if isinstance(l, list) else [l]
+
 class CMake(object):
 	def __init__(self, bld, location):
 		self.bld = bld
@@ -298,11 +302,14 @@ class CMake(object):
 		else: # cstlib, cxxstlib or objects
 			content += 'add_library(%s ${%s_SOURCES})\n' % (name, name)
 
-		libs = getattr(tgen, 'use', []) + getattr(tgen, 'lib', [])
+		libs = getattrlist(tgen, 'use') + getattrlist(tgen, 'lib')
 		if len(libs):
 			content += '\n'
+			libnames = []
 			for lib in libs:
-				content += 'target_link_libraries(%s %s)\n' % (name, lib)
+				libenv = tgen.env["LIB_"+lib];
+				libnames += libenv if libenv else [lib]
+			content += 'target_link_libraries(%s %s)\n' % (name, " ".join(libnames))
 			content += '\n'
 
 		return content
