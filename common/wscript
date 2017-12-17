@@ -48,6 +48,7 @@ def build(bld):
         'JackAPI.cpp',
         'JackClient.cpp',
         'JackConnectionManager.cpp',
+        'JackDelay.cpp',
         'ringbuffer.c',
         'JackError.cpp',
         'JackException.cpp',
