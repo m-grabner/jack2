@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "types.h"
 #include "JackConstants.h"
 #include "JackCompilerDeps.h"
+#include "JackDelay.h"
 
 namespace Jack
 {
@@ -59,6 +60,10 @@ class SERVER_EXPORT JackPort
         bool fInUse;
         jack_port_id_t fTied;   // Locally tied source port
         jack_default_audio_sample_t fBuffer[BUFFER_SIZE_MAX + 8];
+
+#if JACK_DELAY_MAX
+        JackDelay fDelay;
+#endif
 
         bool IsUsed() const
         {
@@ -112,6 +117,13 @@ class SERVER_EXPORT JackPort
         }
 
         int GetRefNum() const;
+
+#if JACK_DELAY_MAX
+        inline JackDelay* GetDelay()
+        {
+            return &fDelay;
+        }
+#endif
 
 } POST_PACKED_STRUCTURE;
 

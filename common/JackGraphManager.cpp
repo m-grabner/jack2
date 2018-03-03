@@ -200,10 +200,22 @@ void* JackGraphManager::GetBuffer(jack_port_id_t port_index, jack_nframes_t buff
             void* buffers[1];
             buffers[0] = GetBuffer(src_index, buffer_size);
             port->MixBuffers(buffers, 1, buffer_size);
+#if JACK_DELAY_MAX
+            port->fDelay.Process(port->GetBuffer(), buffer_size);
+#endif
             return port->GetBuffer();
         // Otherwise, use zero-copy mode, just pass the buffer of the connected (output) port.
         } else {
+#if JACK_DELAY_MAX
+            if (port->fDelay.empty()) {
+#endif
             return GetBuffer(src_index, buffer_size);
+#if JACK_DELAY_MAX
+            } else {
+                port->fDelay.Process((jack_default_audio_sample_t *)GetBuffer(src_index, buffer_size), port->GetBuffer(), buffer_size);
+                return port->GetBuffer();
+            }
+#endif
         }
 
     // Multiple connections : mix all buffers
@@ -220,6 +232,9 @@ void* JackGraphManager::GetBuffer(jack_port_id_t port_index, jack_nframes_t buff
         }
 
         port->MixBuffers(buffers, i, buffer_size);
+#if JACK_DELAY_MAX
+        port->fDelay.Process(port->GetBuffer(), buffer_size);
+#endif
         return port->GetBuffer();
     }
 }

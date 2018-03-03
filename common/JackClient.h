@@ -120,6 +120,10 @@ class SERVER_EXPORT JackClient : public JackClientInterface, public JackRunnable
         inline void InitAux();
         inline void SetupRealTime();
 
+#if JACK_DELAY_MAX
+        inline void ProcessOutputDelay();
+#endif
+
         int HandleLatencyCallback(int status);
 
     public:

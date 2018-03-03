@@ -55,7 +55,7 @@ void JackDelay::resize(jack_nframes_t bufferSizeNew)
 
 void JackDelay::Process(const jack_default_audio_sample_t *in, jack_default_audio_sample_t *out, jack_nframes_t n)
 {
-    if(fBufferSize == 0)
+    if(empty())
     {
         // no delay -> just copy input to output:
         std::copy(in, in + n, out);
@@ -102,7 +102,7 @@ void JackDelay::Process(const jack_default_audio_sample_t *in, jack_default_audi
 
 void JackDelay::Process(jack_default_audio_sample_t *inout, jack_nframes_t n)
 {
-    if(fBufferSize == 0)
+    if(empty())
         return;  // no delay -> nothing to be done
 
     jack_nframes_t blockSize = std::min(n, fBufferSize);

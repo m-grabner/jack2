@@ -615,9 +615,35 @@ void JackClient::CycleSignal(int status)
     CycleSignalAux(status);
 }
 
+#if JACK_DELAY_MAX
+
+inline void JackClient::ProcessOutputDelay()
+{
+    JackGraphManager* manager = GetGraphManager();
+    jack_nframes_t size = GetEngineControl()->fBufferSize;
+
+    for (list<jack_port_id_t>::iterator it = fPortList.begin(); it != fPortList.end(); it++) {
+        JackPort* port = manager->GetPort(*it);
+        if (port->GetFlags() & JackPortIsOutput) {
+            port->GetDelay()->Process(port->GetBuffer(), size);
+        }
+    }
+}
+
+#endif
+
 inline int JackClient::CallProcessCallback()
 {
-    return (fProcess != NULL) ? fProcess(GetEngineControl()->fBufferSize, fProcessArg) : 0;
+    if (fProcess == NULL)
+        return 0;
+
+    int ret = fProcess(GetEngineControl()->fBufferSize, fProcessArg);
+
+#if JACK_DELAY_MAX
+    ProcessOutputDelay();
+#endif
+
+    return ret;
 }
 
 inline bool JackClient::WaitSync()
