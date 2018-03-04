@@ -41,6 +41,10 @@ Most of the generic audio handing code is part of this class :
 
 class SERVER_EXPORT JackAudioDriver : public JackDriver
 {
+#if JACK_DELAY_MAX
+    private:
+        void ProcessDelayRead();
+#endif
 
     protected:
 

@@ -103,16 +103,6 @@ JackFFADODriver::ffado_driver_read (ffado_driver_t * driver, jack_nframes_t nfra
     /* now transfer the buffers */
     ffado_streaming_transfer_capture_buffers(driver->dev);
 
-#if JACK_DELAY_MAX
-    for (chn = 0; chn < driver->capture_nchannels; chn++) {
-        if ((fGraphManager->GetConnectionsNum(fCapturePortList[chn]) > 0) && (driver->capture_channels[chn].stream_type == ffado_stream_type_audio)) {
-            JackPort* port = fGraphManager->GetPort(fCapturePortList[chn]);
-            buf = (jack_default_audio_sample_t*)fGraphManager->GetBuffer(fCapturePortList[chn], nframes);
-            port->GetDelay()->Process(buf, nframes);
-        }
-    }
-#endif
-
     /* process the midi data */
     for (chn = 0; chn < driver->capture_nchannels; chn++) {
         if (driver->capture_channels[chn].stream_type == ffado_stream_type_midi) {

@@ -207,6 +207,20 @@ The driver "asynchronous" mode: output buffers computed at the *previous cycle* 
 synchronize to the end of client graph execution.
 */
 
+#if JACK_DELAY_MAX
+
+void JackAudioDriver::ProcessDelayRead()
+{
+    for (int i = 0; i < fCaptureChannels; ++i) {
+        if (fCapturePortList[i] && (fGraphManager->GetConnections(fCapturePortList[i]) != 0)) {
+            JackPort* port = fGraphManager->GetPort(fCapturePortList[i]);
+            port->GetDelay()->Process(port->GetBuffer(), fEngineControl->fBufferSize);
+        }
+    }
+}
+
+#endif
+
 int JackAudioDriver::ProcessAsync()
 {
     // Read input buffers for the current cycle
@@ -214,6 +228,10 @@ int JackAudioDriver::ProcessAsync()
         jack_error("JackAudioDriver::ProcessAsync: read error, stopping...");
         return -1;
     }
+
+#if JACK_DELAY_MAX
+    ProcessDelayRead();
+#endif
 
     // Write output buffers from the previous cycle
     if (Write() < 0) {
@@ -288,6 +306,10 @@ int JackAudioDriver::ProcessSync()
         jack_error("JackAudioDriver::ProcessSync: read error, stopping...");
         return -1;
     }
+
+#if JACK_DELAY_MAX
+    ProcessDelayRead();
+#endif
 
     // Process graph
     ProcessGraphSync();
